@@ -16,6 +16,6 @@ So while the default functionality could get us quite a long way, there were a c
 ATSS is built on top of the MOOSE framework and requires [MOOSE](https://github.com/FlightControl-Master/MOOSE) to be loaded for it to work. I will always try to keep ATSS working with the latest MOOSE release in case something drastic changes there. In reality, this probably won't be the case and if you have a "semi" up to date version of MOOSE in your mission already, ATSS should work just fine. 
 
 ## How it works
-The actual functionality behind ATSS is quite simple as it's all named-based for the time being. Meaning that as long as you make sure you use a naming convention that makes sense to you, the mission designer, it shouldn't be too difficult to get everything running smoothly. I will try to outline a number of use-case scenarios in this README file that should help you on your way. 
+The actual functionality behind ATSS is quite simple as it's all named-based for the time being. Meaning that as long as you make sure you use a naming convention that makes sense to you, the mission designer, it shouldn't be too difficult to get everything running smoothly. I will try to outline a number of use-case scenarios in the wiki that should help you on your way. 
 
 
