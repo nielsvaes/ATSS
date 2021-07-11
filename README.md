@@ -18,44 +18,4 @@ ATSS is built on top of the MOOSE framework and requires [MOOSE](https://github.
 ## How it works
 The actual functionality behind ATSS is quite simple as it's all named-based for the time being. Meaning that as long as you make sure you use a naming convention that makes sense to you, the mission designer, it shouldn't be too difficult to get everything running smoothly. I will try to outline a number of use-case scenarios in this README file that should help you on your way. 
 
-## Making sure everything is loaded and good to go
-You need to make sure everything is loaded (in the correct order, to some degree) when the mission starts. There are multiple ways to load scripts in DCS. The most common way is DO SCRIPT FILE. This will include all your scripts in the final .miz file, making it very portable
-
-| Trigger | Conditions | Action|
-| -- | -- | -- |
-| MISSION START | None | DO SCRIPT FILE, Moose.lua |
-
-![image](https://user-images.githubusercontent.com/7821618/125203702-dfe24400-e279-11eb-8d89-7e097cdff300.png)
-
-| Trigger | Conditions | Action|
-| -- | -- | -- |
-| MISSION START | None | DO SCRIPT FILE, constants.lua |
-| MISSION START | None | DO SCRIPT FILE, utils.lua |
-| MISSION START | None | DO SCRIPT FILE, threat_spawners.lua |
-
-![image](https://user-images.githubusercontent.com/7821618/125203634-84b05180-e279-11eb-92e3-d652653c2671.png)
-
-
-You can also load script files from whatever location they are on your hard drive. This makes the mission not portable, but makes it a lot easier when you're constantly editing scripts. For example, if you're setting up the radio menu through code instead of the Mission Editor, this is a real time saver. 
-
-| Trigger | Conditions | Action|
-| -- | -- | -- |
-| MISSION START | None | DO SCRIPT, `assert(loadfile("D:/Google Drive/Coconut Cockpit/ATSS/constants.lua"))()` |
-| MISSION START | None | DO SCRIPT, `assert(loadfile("D:/Google Drive/Coconut Cockpit/ATSS/utils.lua"))()` |
-| MISSION START | None | DO SCRIPT, `assert(loadfile("D:/Google Drive/Coconut Cockpit/ATSS/threat_spawners.lua"))()` |
-
-![image](https://user-images.githubusercontent.com/7821618/125204399-66e4eb80-e27d-11eb-9f9d-507522a1ad15.png)
-
-
-ATSS should now be ready to use in further triggers or from the radio menu
-
-# Building an example mission
-
-## Goal
-Let's build an example mission that illustrates some use cases that might be interesting. For this example I'm using the free Marianas map and I'm going to set up 3 objectives:
-
-* BVR practice
-* Strike on a radar site
-* Maverick training range
-
 
