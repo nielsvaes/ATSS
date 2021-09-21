@@ -117,12 +117,10 @@ function SpawnThreat(kwargs)
         kwargs.size = kwargs.size or math.random(DEFAULTS.spawn_min, DEFAULTS.spawn_max)
     end
 
-
     -- convert NM to KM, since it's easier to deal with NM in the ME
     waypoint_offset_min = NauticalMilesToKilometres(kwargs.waypoint_offset_min) or 0
     waypoint_offset_max = NauticalMilesToKilometres(kwargs.waypoint_offset_max) or 0
     local waypoint_offset = math.random(waypoint_offset_min, waypoint_offset_max)
-
 
     -- make sure we're always dealing with a table when checking the zones
     if type(kwargs.zones) == "string" then
@@ -142,25 +140,21 @@ function SpawnThreat(kwargs)
 
     -- make sure we're always dealing with a table when checking the groups
     if type(kwargs.groups) == "string" then
-        env.info("------------ it's a string")
         kwargs.groups = { kwargs.groups }
     end
 
     -- search the map for usuable groups and put them in threats
     local threats = {}
+    -- MOOSE's InitRandomizeTemplate needs strings, not actual objects, so we have to grab the names of everything in the threats array
+    local threat_names = {}
     for _, group in pairs(kwargs.groups) do
         local found_groups = GetGroupsContaining(group, false)
         if found_groups then
             for _, found_group in pairs(found_groups) do
                 table.insert(threats, found_group)
+                table.insert(threat_names, found_group.GroupName)
             end
         end
-    end
-
-    -- MOOSE's InitRandomizeTemplate needs strings, not actual objects, so we have to grab the names of everything in the threats array
-    local threat_names = {}
-    for _, threat in pairs(threats) do
-        table.insert(threat_names, threat.GroupName)
     end
 
     -- if we're not allowed to append to the existing threats, we're gonna nuke them all before spawning anything else
@@ -177,8 +171,8 @@ function SpawnThreat(kwargs)
     for i=1, kwargs.size do
         env.info("Spawning " .. string.format("%02d", i))
 
-        if kwargs.threat_type == THREAT_TYPE.A2G then
-            group:InitHeading(0, 360)
+        if kwargs.threat_type == THREAT_TYPE.GROUND then
+            group:InitGroupHeading(0, 360)
         end
         group:Spawn()
     end
@@ -189,9 +183,6 @@ function SpawnThreat(kwargs)
         MESSAGE:New("Threat spawned"):ToAll()
         MESSAGE:New("Threat type: " .. kwargs.threat_type):ToAll()
         MESSAGE:New("Threat number: " .. kwargs.size):ToAll()
-        --for _, group in pairs(kwargs.groups) do
-        --    MESSAGE:New("Threat group: " .. group):ToAll()
-        --end
     end
 end
 
@@ -257,6 +248,7 @@ function SpawnStaticObject(kwargs)
 
     -- spawn as many statics as the amount given
     local static_type
+    local static_object
     for _ = 1, kwargs.amount do
         static_type = kwargs.types[math.random(#kwargs.types)] -- pick a random type in case we have multiple
         local zone = spawn_zones[math.random(#spawn_zones)] -- pick a random zone in case we have multiple
@@ -272,6 +264,7 @@ function SpawnStaticObject(kwargs)
         static_object:SpawnFromPointVec2(position, math.random(heading_min, heading_max))
     end
     MESSAGE:New("Spawned " .. static_type .. " times " .. tostring(kwargs.amount)):ToAll()
+    return static_object
 end
 
 
@@ -283,15 +276,15 @@ end
 -----------------------------------------------------------------------
 
 
-if #GetGroupsContaining(AIR.random, false) == 0 then
-    MESSAGE:New("WARNING: Can't find an AIR RANDOM group! If you're spawning air threats, make sure you've named them all!", 15):ToAll()
-end
-if #GetGroupsContaining(GROUND.random, false) == 0 then
-    MESSAGE:New("WARNING: Can't find an GROUND RANDOM group! If you're spawning ground threats, make sure you've named them all!", 15):ToAll()
-end
-if #GetGroupsContaining(SHIP.random, false) == 0 then
-    MESSAGE:New("WARNING: Can't find an SHIP RANDOM group! If you're spawning ship threats, make sure you've named them all!", 15):ToAll()
-end
+--if #GetGroupsContaining(AIR.random, false) == 0 then
+--    MESSAGE:New("WARNING: Can't find an AIR RANDOM group! If you're spawning air threats, make sure you've named them all!", 15):ToAll()
+--end
+--if #GetGroupsContaining(GROUND.random, false) == 0 then
+--    MESSAGE:New("WARNING: Can't find an GROUND RANDOM group! If you're spawning ground threats, make sure you've named them all!", 15):ToAll()
+--end
+--if #GetGroupsContaining(SHIP.random, false) == 0 then
+--    MESSAGE:New("WARNING: Can't find an SHIP RANDOM group! If you're spawning ship threats, make sure you've named them all!", 15):ToAll()
+--end
 
 
 MESSAGE:New("Threat spawners loaded"):ToAll()
