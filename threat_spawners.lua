@@ -184,6 +184,7 @@ function SpawnThreat(kwargs)
         MESSAGE:New("Threat type: " .. kwargs.threat_type):ToAll()
         MESSAGE:New("Threat number: " .. kwargs.size):ToAll()
     end
+    return group
 end
 
 
