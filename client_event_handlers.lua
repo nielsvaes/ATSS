@@ -18,8 +18,8 @@ function ClientSet:OnEventPlayerEnterAircraft(event_data)
     env.info("Client connected!")
     env.info(unit_name)
 
-    MESSAGE:New(player_name .. " joined the server"):ToGroup(group)
-    --client:Message(GUAM_GENERAL_BRIEFING, 30)
+    MESSAGE:New(player_name .. " joined the server"):ToAll()
+    MESSAGE:New("Message for client"):ToClient(client)
 end
 
 function ClientSet:OnEventKill(event_data)
@@ -37,16 +37,19 @@ SetEventHandler()
 --ClientSet = SET_CLIENT:New()
 --                      :FilterOnce()
 --
---ClientSet:ForEachClient(
---        function(_client)
---            env.info("Client connected")
---            env.info(_client:GetClientGroupName())
---            _client:HandleEvent(EVENTS.PlayerEnterAircraft)
+--env.info("Number of clients: " .. tostring(#ClientSet))
 --
---            function _client:OnEventPlayerEnterAircraft(_event_data)
---                local name = _event_data.IniUnitName
---                local client_name = _client:GetPlayer()
---                MESSAGE:New("Welcome, " .. client_name, 20):ToClient(_client)
+--ClientSet:ForEachClient(
+--        function(client)
+--            env.info(client:GetClientGroupName())
+--            client:HandleEvent(EVENTS.PlayerEnterAircraft)
+--
+--            function client:OnEventPlayerEnterAircraft(event_data)
+--                env.info("Client connected")
+--                local name = event_data.IniUnitName
+--                local client_name = client:GetPlayer()
+--                local group = event_data.IniGroup
+--                MESSAGE:New("------------------Welcome, " .. client_name, 20):ToGroup(group)
 --            end
 --        end
 --)
