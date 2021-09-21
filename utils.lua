@@ -1,15 +1,22 @@
 ---GetGroupsContaining
 ---Returns a table of all the air to air groups that start with a given prefix
 ---@param substring string
-function GetGroupsContaining(substring, as_strings)
+function GetGroupsContaining(substring, as_strings, as_set)
     as_strings = as_strings or false
+    as_set = as_set or false
+
     local group_set = SET_GROUP:New()
                                :FilterPrefixes(substring)
                                :FilterOnce()
+
+    if as_set then
+        return group_set
+    end
+
     local group_array = group_set:GetSetObjects()
 
     if #group_array == 0 then
-        env.error("CAN'T FIND ANY GROUPS WITH " .. substring)
+        env.error("CAN'T FIND ANY GROUPS WITH: (" .. substring .. ")")
     end
 
     if as_strings then
@@ -28,15 +35,21 @@ end
 ---GetZonesContaining
 ---Returns a table of all the zones that start with a given prefix
 ---@param substring string
-function GetZonesContaining(substring, as_strings)
+function GetZonesContaining(substring, as_strings, as_set)
     as_strings = as_strings or false
+    as_set = as_set or false
+
     local zone_set = SET_ZONE:New()
                              :FilterPrefixes(substring)
                              :FilterOnce()
+    if as_set then
+        return zone_set
+    end
+
     local zone_array = zone_set:GetSetObjects()
 
     if #zone_array == 0 then
-        env.error("CAN'T FIND ANY ZONES WITH " .. substring)
+        env.error("CAN'T FIND ANY ZONES WITH: " .. substring)
     end
 
     if as_strings then
@@ -200,4 +213,14 @@ function PercentageChance(chance)
     return false
 end
 
+
+---ToTable
+---@param var any
+---If the variable passed is not a table, wrap it in {} to make it one
+function EnsureTable(var)
+    if type(var) ~= "table" then
+        var = {var}
+    end
+    return var
+end
 MESSAGE:New("Utils loaded", 5):ToAll()
