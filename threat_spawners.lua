@@ -1,5 +1,6 @@
 ALL_SPAWNED_GROUPS = {}
 ALL_SPAWNED_STATICS = {}
+ATSS = {}
 
 ---SpawnThreat
 ---@param kwargs table
@@ -88,6 +89,7 @@ ALL_SPAWNED_STATICS = {}
 ---waypoint_offset_max: float       - How much maximal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
 --SpawnThreat(type, zones, groups, threat_spawner, alias_name, waypoint_offset_min, waypoint_offset_max, notify, clear_first )
 function SpawnThreat(kwargs)
+    math.randomseed(os.time())
     -- check which type of threat we need to spawn and set default values
     if kwargs.threat_type == THREAT_TYPE.AIR then
         kwargs.groups = kwargs.groups or AIR.random
@@ -194,6 +196,7 @@ end
 ---Group must be set to LATE ACTIVATION
 ---Group can be respawned after being destroyed
 function SpawnSpecificGroup(group_name, notify)
+    math.randomseed(os.time())
     local group = SPAWN:New(group_name)
     group:Spawn()
 
@@ -217,6 +220,7 @@ end
 ---@param heading_max int
 --function SpawnStaticObject(category, types, country, zones, amount, alias_name, heading_min, heading_max, random_in_zone)
 function SpawnStaticObject(kwargs)
+    math.randomseed(os.time())
     kwargs.amount = kwargs.amount or 1
     kwargs.heading_min = kwargs.heading_min or 0
     kwargs.heading_max = kwargs.heading_max or 360
