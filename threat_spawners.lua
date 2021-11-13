@@ -54,7 +54,7 @@ ATSS = {}
 ---                                   groups consist of 8 vehicles and you set size to 6, you'd get 6 groups of 8 vehicles. Total number of vehicles that are spawned will
 ---                                   be 48
 ---threat_spawner: string           - the LATE ACTIVATION group that will be used to spawn the groups. The groups will get the initial heading, waypoints and inital speed from the threat_spawner.
----                                   If none is given, the function will default to the value of A2A.spawner/A2G.spawner/A2SHIP.spawner, set in constants.lua.
+---                                   If none is given, the function will default to the value of A2A.spawner/A2G.spawner/A2SHIP.spawner, set in globals.lua.
 ---                                   So make sure there is a group on the map that has this name set.
 ---
 ---                                   You can have multiple of these spawner groups for different purposes.
@@ -89,7 +89,6 @@ ATSS = {}
 ---waypoint_offset_max: float       - How much maximal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
 --SpawnThreat(type, zones, groups, threat_spawner, alias_name, waypoint_offset_min, waypoint_offset_max, notify, clear_first )
 function SpawnThreat(kwargs)
-    math.randomseed(os.time())
     -- check which type of threat we need to spawn and set default values
     if kwargs.threat_type == THREAT_TYPE.AIR then
         kwargs.groups = kwargs.groups or AIR.random
@@ -196,7 +195,6 @@ end
 ---Group must be set to LATE ACTIVATION
 ---Group can be respawned after being destroyed
 function SpawnSpecificGroup(group_name, notify)
-    math.randomseed(os.time())
     local group = SPAWN:New(group_name)
     group:Spawn()
 
@@ -218,14 +216,14 @@ end
 ---@param amount int
 ---@param heading_min int
 ---@param heading_max int
---function SpawnStaticObject(category, types, country, zones, amount, alias_name, heading_min, heading_max, random_in_zone)
+--function SpawnStaticObject(category, types, country, shape, zones, amount, alias_name, heading_min, heading_max, random_in_zone, notify)
 function SpawnStaticObject(kwargs)
-    math.randomseed(os.time())
     kwargs.amount = kwargs.amount or 1
     kwargs.heading_min = kwargs.heading_min or 0
     kwargs.heading_max = kwargs.heading_max or 360
     kwargs.alias_name = kwargs.alias_name or "STATIC_"
     if kwargs.random_in_zone == nil then kwargs.random_in_zone = true else kwargs.random_in_zone = kwargs.random_in_zone end
+    kwargs.notify = kwargs.notify or false
 
     -- make sure headings are clamped between 0 and 360
     local heading_min = Clamp(kwargs.heading_min, 0, 360)
@@ -251,14 +249,14 @@ function SpawnStaticObject(kwargs)
         end
     end
 
-    -- spawn as many statics as the amount given
-    local static_type
+    -- static object to return
     local static_object
     for _ = 1, kwargs.amount do
-        static_type = kwargs.types[math.random(#kwargs.types)] -- pick a random type in case we have multiple
+        local static_type = kwargs.types[math.random(#kwargs.types)] -- pick a random type in case we have multiple
         local zone = spawn_zones[math.random(#spawn_zones)] -- pick a random zone in case we have multiple
-        local static_object = SPAWNSTATIC:NewFromType(static_type, kwargs.category, kwargs.country)
-                                         :InitNamePrefix(kwargs.alias_name .. static_type .. tostring(math.random(0, 90000))) -- make sure it has a random name
+        static_object = SPAWNSTATIC:NewFromType(static_type, kwargs.category, kwargs.country)
+                                   :InitNamePrefix(kwargs.alias_name .. static_type .. tostring(math.random(0, 90000))) -- make sure it has a random name
+                                   :InitShape(kwargs.shape)
 
         local position
         if kwargs.random_in_zone then
@@ -268,7 +266,10 @@ function SpawnStaticObject(kwargs)
         end
         static_object:SpawnFromPointVec2(position, math.random(heading_min, heading_max))
     end
-    MESSAGE:New("Spawned " .. static_type .. " times " .. tostring(kwargs.amount)):ToAll()
+
+    if kwargs.notify then
+        MESSAGE:New("Spawned " .. static_type .. " times " .. tostring(kwargs.amount)):ToAll()
+    end
     return static_object
 end
 
