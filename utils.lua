@@ -195,17 +195,27 @@ end
 ---PrintTable
 ---@param table
 ---Oneliner to print contents of a table
-function PrintTable(table)
-    for key, value in pairs(table) do
-        env.info("key:" .. tostring(key))
-        env.info("value:" .. tostring(value))
-    end
+function PrintTable(tbl, indent)
+      if not indent then indent = 4 end
+      for k, v in pairs(tbl) do
+            formatting = string.rep("  ", indent) .. k .. ": "
+            if type(v) == "table" then
+                env.info(formatting)
+                PrintTable(v, indent * 2)
+            elseif type(v) == 'boolean' then
+                env.info(formatting .. tostring(v))
+            else
+                env.info(formatting .. v)
+            end
+            env.info("=====================================")
+      end
 end
 
 ---PercentageChance
 ---@param chance int
 ---Does a random dice roll to see if something with x percent of chance will happen
 function PercentageChance(chance)
+    chance = Clamp(chance, 0, 100)
     local percentage = math.random(0, 100)
     if percentage < chance then
         return true
@@ -223,4 +233,26 @@ function EnsureTable(var)
     end
     return var
 end
+
+---ShuffleTable
+---@param tbl table
+---Returns a shuffled table
+function ShuffleTable(tbl)
+    local new_table = {}
+    for _, value in ipairs(tbl) do
+        local pos = math.random(1, #new_table +1)
+        table.insert(new_table, pos, value)
+    end
+    return new_table
+end
+
+---DirName
+---@param path string
+---@param separator string
+---Returns the parent folder of a path
+function DirName(path, separator)
+    separator=separator or'/'
+    return path:match("(.*"..separator..")")
+end
+
 MESSAGE:New("Utils loaded", 5):ToAll()
