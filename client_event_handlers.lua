@@ -1,9 +1,13 @@
 ClientSet = SET_CLIENT:New()
-                      :FilterOnce()
+                      :FilterStart()
 
 function SetEventHandler()
     ClientBirth = ClientSet:HandleEvent(EVENTS.PlayerEnterAircraft)
-    ClieantDead = ClientSet:HandleEvent(EVENTS.Kill)
+    ClientDead = ClientSet:HandleEvent(EVENTS.Kill)
+    --ClientHit = ClientSet:HandleEvent(EVENTS.Hit)
+    --ClientWeaponRelease = ClientSet:HandleEvent(EVENTS.Shot)
+    --ClientLand = ClientSet:HandleEvent(EVENTS.Land)
+
 end
 
 function ClientSet:OnEventPlayerEnterAircraft(event_data)
@@ -19,15 +23,49 @@ function ClientSet:OnEventPlayerEnterAircraft(event_data)
     env.info(unit_name)
 
     MESSAGE:New(player_name .. " joined the server"):ToAll()
-    MESSAGE:New("Message for client"):ToClient(client)
+    --MESSAGE:New("Message for client"):ToClient(client)
+    --client:Message("Testing client:Message")
 end
 
 function ClientSet:OnEventKill(event_data)
-    local player_name = event_data.IniPlayerName
-    local target_group_name = event_data.TgtGroupName
-    local target_type_name = event_data.TgtTypeName
+    local player_name = event_data.IniPlayerName or "AI"
+    local target_type_name = event_data.TgtTypeName or "UNDEFINED TARGET TYPE NAME"
 
-    MESSAGE:New(player_name .. " killed a " .. target_type_name .. " (" .. target_group_name .. ")"):ToAll()
+    if player_name ~= "AI" then
+        message = player_name .. " destroyed " .. target_type_name
+    end
+    MESSAGE:New(message, 10):ToAll()
+end
+
+--function ClientSet:OnEventHit(event_data)
+--    local player_name = event_data.IniPlayerName
+--    local target_type_name = event_data.TgtTypeName
+--
+--    MESSAGE:New(player_name .. " hit " .. target_type_name, 10):ToAll()
+--end
+
+function ClientSet:OnEventLand(event_data)
+    local unit = event_data.IniUnit
+    ammo = unit:GetAmmo()
+    PrintTable(ammo)
+end
+
+
+function ClientSet:OnEventShot(event_data)
+    local unit = event_data.IniUnit
+    ammo = unit:GetAmmo()
+    for _, ammo_table in pairs(ammo) do
+        --PrintTable(ammo_table)
+    end
+
+
+
+    --local weapon = event_data.WeaponName
+    --MESSAGE:New(weapon .. " was released!", 25):ToAll()
+    --
+    --file = io.open("C:/testfile.txt")
+    --file:write(weapon .. " was released!\n")
+    --file:close()
 end
 
 SetEventHandler()
