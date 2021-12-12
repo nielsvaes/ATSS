@@ -1,7 +1,9 @@
----GetGroupsContaining
+ATSS_UTILS = {}
+
+---get_groups_containing
 ---Returns a table of all the air to air groups that start with a given prefix
 ---@param substring string
-function GetGroupsContaining(substring, as_strings, as_set)
+function ATSS_UTILS.get_groups_containing(substring, as_strings, as_set)
     as_strings = as_strings or false
     as_set = as_set or false
 
@@ -32,10 +34,10 @@ function GetGroupsContaining(substring, as_strings, as_set)
 end
 
 
----GetZonesContaining
+---get_zones_containing
 ---Returns a table of all the zones that start with a given prefix
 ---@param substring string
-function GetZonesContaining(substring, as_strings, as_set)
+function ATSS_UTILS.get_zones_containing(substring, as_strings, as_set)
     as_strings = as_strings or false
     as_set = as_set or false
 
@@ -64,10 +66,10 @@ function GetZonesContaining(substring, as_strings, as_set)
     end
 end
 
----GetStaticsContaining
+---get_statics_containing
 ---Returns a table of all the air to air groups that start with a given prefix
 ---@param substring string
-function GetStaticsContaining(substring, as_strings)
+function ATSS_UTILS.get_statics_containing(substring, as_strings)
     as_strings = as_strings or false
     local static_set = SET_STATIC:New()
                                  :FilterPrefixes(substring)
@@ -91,10 +93,10 @@ function GetStaticsContaining(substring, as_strings)
 end
 
 
----AnyOfGroupAlive
+---any_of_group_alive
 ---@param group_name string
 ---Returns true if any units of a certain group are still alive
-function AnyOfGroupAlive(group_name)
+function ATSS_UTILS.any_of_group_alive(group_name)
     local set = SET_GROUP:New()
                          :FilterPrefixes(group_name)
                          :FilterOnce()
@@ -106,29 +108,29 @@ function AnyOfGroupAlive(group_name)
     return false
 end
 
----SetUserFlag
+---set_user_flag
 ---Easier to read than trigger.action.setUserFlag
 ---@param flag_number int
 ---@param value int int or bool value
-function SetUserFlag(flag_number, value)
+function ATSS_UTILS.set_user_flag(flag_number, value)
     --if not type(flag_number) == "string" then flag_number = tostring(flag_number) end
 
     trigger.action.setUserFlag(flag_number, value)
 end
 
----GetUserFlag
+---get_user_flag
 ---Easier to read than trigger.action.getUserFlag
 ---@param flag_number int
-function GetUserFlag(flag_number)
+function ATSS_UTILS.get_user_flag(flag_number)
     return trigger.misc.getUserFlag(flag_number)
 end
 
 
----DestroyAllGroupsContaining
+---destroy_all_groups_containing
 ---Destroy all groups containing a string
 ---@param search_strings void
 ---@param message string
-function DestroyAllGroupsContaining(search_strings, message)
+function ATSS_UTILS.destroy_all_groups_containing(search_strings, message)
     message = message or nil
     if type(search_strings) == "string" then
         search_strings = { search_strings }
@@ -152,11 +154,11 @@ function DestroyAllGroupsContaining(search_strings, message)
 end
 
 
----DestroyAllGroupsContaining
+---destroy_all_statics_containing
 ---Destroy all groups containing a string
 ---@param search_strings void
 ---@param message string
-function DestroyAllStaticsContaining(search_strings, message)
+function ATSS_UTILS.destroy_all_statics_containing(search_strings, message)
     message = message or nil
     if type(search_strings) == "string" then
         search_strings = { search_strings }
@@ -176,26 +178,26 @@ function DestroyAllStaticsContaining(search_strings, message)
 end
 
 
----NauticalMilesToKilometres
+---nautical_miles_to_kilometers
 ---@param miles float
 ---Oneliner to convert nautical miles to kilometers
-function NauticalMilesToKilometres(miles)
+function ATSS_UTILS.nautical_miles_to_kilometers(miles)
     miles = miles or 0
     return miles * 1,852
 end
 
 
-function Clamp(value, min, max)
+function ATSS_UTILS.clamp(value, min, max)
     if value < min then value = min end
     if value > max then value = max end
 
     return value
 end
 
----PrintTable
+---print_table
 ---@param table
 ---Oneliner to print contents of a table
-function PrintTable(tbl, indent)
+function ATSS_UTILS.print_table(tbl, indent)
       if not indent then indent = 4 end
       for k, v in pairs(tbl) do
             formatting = string.rep("  ", indent) .. k .. ": "
@@ -211,10 +213,10 @@ function PrintTable(tbl, indent)
       end
 end
 
----PercentageChance
+---percentage_chance
 ---@param chance int
 ---Does a random dice roll to see if something with x percent of chance will happen
-function PercentageChance(chance)
+function ATSS_UTILS.percentage_chance(chance)
     chance = Clamp(chance, 0, 100)
     local percentage = math.random(0, 100)
     if percentage < chance then
@@ -224,20 +226,20 @@ function PercentageChance(chance)
 end
 
 
----ToTable
+---ensure_table
 ---@param var any
 ---If the variable passed is not a table, wrap it in {} to make it one
-function EnsureTable(var)
+function ATSS_UTILS.ensure_table(var)
     if type(var) ~= "table" then
         var = {var}
     end
     return var
 end
 
----ShuffleTable
+---shuffle_table
 ---@param tbl table
 ---Returns a shuffled table
-function ShuffleTable(tbl)
+function ATSS_UTILS.shuffle_table(tbl)
     local new_table = {}
     for _, value in ipairs(tbl) do
         local pos = math.random(1, #new_table +1)
@@ -250,9 +252,17 @@ end
 ---@param path string
 ---@param separator string
 ---Returns the parent folder of a path
-function DirName(path, separator)
+function ATSS_UTILS.dir_name(path, separator)
     separator=separator or'/'
     return path:match("(.*"..separator..")")
+end
+
+function ATSS_UTILS.starts_with(str, start)
+   return str:sub(1, #start) == start
+end
+
+function ATSS_UTILS.ends_with(str, ending)
+   return ending == "" or str:sub(-#ending) == ending
 end
 
 MESSAGE:New("Utils loaded", 5):ToAll()

@@ -88,7 +88,7 @@ ATSS = {}
 ---waypoint_offset_min: float       - How much minimal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
 ---waypoint_offset_max: float       - How much maximal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
 --SpawnThreat(type, zones, groups, threat_spawner, alias_name, waypoint_offset_min, waypoint_offset_max, notify, clear_first )
-function SpawnThreat(kwargs)
+function ATSS.SpawnThreat(kwargs)
     -- check which type of threat we need to spawn and set default values
     if kwargs.threat_type == THREAT_TYPE.AIR then
         kwargs.groups = kwargs.groups or AIR.random
@@ -119,8 +119,8 @@ function SpawnThreat(kwargs)
     end
 
     -- convert NM to KM, since it's easier to deal with NM in the ME
-    waypoint_offset_min = NauticalMilesToKilometres(kwargs.waypoint_offset_min) or 0
-    waypoint_offset_max = NauticalMilesToKilometres(kwargs.waypoint_offset_max) or 0
+    waypoint_offset_min = ATSS_UTILS.nautical_miles_to_kilometers(kwargs.waypoint_offset_min) or 0
+    waypoint_offset_max = ATSS_UTILS.nautical_miles_to_kilometers(kwargs.waypoint_offset_max) or 0
     local waypoint_offset = math.random(waypoint_offset_min, waypoint_offset_max)
 
     -- make sure we're always dealing with a table when checking the zones
@@ -131,7 +131,7 @@ function SpawnThreat(kwargs)
     -- search the map for usable zones and put them in spawn_zones
     local spawn_zones = {}
     for _, zone in pairs(kwargs.zones )do
-        local found_zones = GetZonesContaining(zone)
+        local found_zones = ATSS_UTILS.get_zones_containing(zone)
         if found_zones then
             for _, found_zone in pairs(found_zones) do
                 table.insert(spawn_zones, found_zone)
@@ -149,7 +149,7 @@ function SpawnThreat(kwargs)
     -- MOOSE's InitRandomizeTemplate needs strings, not actual objects, so we have to grab the names of everything in the threats array
     local threat_names = {}
     for _, group in pairs(kwargs.groups) do
-        local found_groups = GetGroupsContaining(group, false)
+        local found_groups = ATSS_UTILS.get_groups_containing(group, false)
         if found_groups then
             for _, found_group in pairs(found_groups) do
                 table.insert(threats, found_group)
@@ -160,14 +160,15 @@ function SpawnThreat(kwargs)
 
     -- if we're not allowed to append to the existing threats, we're gonna nuke them all before spawning anything else
     if kwargs.clear_first then
-        DestroyAllGroupsContaining(kwargs.alias_name)
+        ATSS_UTILS.destroy_all_groups_containing(kwargs.alias_name)
     end
 
-    alias_name = kwargs.alias_name .. string.format("%03d", #GetGroupsContaining(kwargs.alias_name) + 1)
+    alias_name = kwargs.alias_name .. string.format("%03d", #ATSS_UTILS.get_groups_containing(kwargs.alias_name) + 1)
     local group = SPAWN:NewWithAlias(kwargs.threat_spawner, alias_name)
                        :InitRandomizeZones(spawn_zones)
                        :InitRandomizeTemplate(threat_names)
                        :InitRandomizeRoute(1, 0, waypoint_offset) -- from the first waypoint until the last one
+
 
     for i=1, kwargs.size do
         env.info("Spawning " .. string.format("%02d", i))
@@ -194,7 +195,7 @@ end
 ---Spawns a specific group that you have placed on the map.
 ---Group must be set to LATE ACTIVATION
 ---Group can be respawned after being destroyed
-function SpawnSpecificGroup(group_name, notify)
+function ATSS.SpawnSpecificGroup(group_name, notify)
     local group = SPAWN:New(group_name)
     group:Spawn()
 
@@ -217,7 +218,7 @@ end
 ---@param heading_min int
 ---@param heading_max int
 --function SpawnStaticObject(category, types, country, shape, zones, amount, alias_name, heading_min, heading_max, random_in_zone, notify)
-function SpawnStaticObject(kwargs)
+function ATSS.SpawnStaticObject(kwargs)
     kwargs.amount = kwargs.amount or 1
     kwargs.heading_min = kwargs.heading_min or 0
     kwargs.heading_max = kwargs.heading_max or 360
@@ -226,8 +227,8 @@ function SpawnStaticObject(kwargs)
     kwargs.notify = kwargs.notify or false
 
     -- make sure headings are clamped between 0 and 360
-    local heading_min = Clamp(kwargs.heading_min, 0, 360)
-    local heading_max = Clamp(kwargs.heading_max, 0, 360)
+    local heading_min = ATSS_UTILS.clamp(kwargs.heading_min, 0, 360)
+    local heading_max = ATSS_UTILS.clamp(kwargs.heading_max, 0, 360)
 
     if type(kwargs.types) == "string" then
         kwargs.types = {kwargs.types}
@@ -241,7 +242,7 @@ function SpawnStaticObject(kwargs)
     -- search the map for usable zones and put them in spawn_zones
     local spawn_zones = {}
     for _, zone in pairs(kwargs.zones) do
-        local found_zones = GetZonesContaining(zone)
+        local found_zones = ATSS_UTILS.get_zones_containing(zone)
         if found_zones then
             for _, found_zone in pairs(found_zones) do
                 table.insert(spawn_zones, found_zone)
