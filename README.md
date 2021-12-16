@@ -1,3 +1,3 @@
-# sidewinder
+# Advanced Threat Spawning System
 
-DCS code
+For DCS
