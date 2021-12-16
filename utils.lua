@@ -257,12 +257,26 @@ function ATSS_UTILS.dir_name(path, separator)
     return path:match("(.*"..separator..")")
 end
 
+
+---starts_with
+---@param str string string to check
+---@param start string character to check
+---Returns true if the string starts with character
 function ATSS_UTILS.starts_with(str, start)
    return str:sub(1, #start) == start
 end
 
+
+
+---ends_with
+---@param str string string to check
+---@param ending string character to check
+---Returns true if the strings ends with character
 function ATSS_UTILS.ends_with(str, ending)
    return ending == "" or str:sub(-#ending) == ending
 end
+
+
+
 
 MESSAGE:New("Utils loaded", 5):ToAll()
