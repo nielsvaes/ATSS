@@ -292,9 +292,9 @@ function ATSS_UTILS.deepcopy(o, seen)
     seen[o] = no
 
     for k, v in next, o, nil do
-      no[deepcopy(k, seen)] = deepcopy(v, seen)
+      no[ATSS_UTILS.deepcopy(k, seen)] = ATSS_UTILS.deepcopy(v, seen)
     end
-    setmetatable(no, deepcopy(getmetatable(o), seen))
+    setmetatable(no, ATSS_UTILS.deepcopy(getmetatable(o), seen))
   else -- number, string, boolean, etc
     no = o
   end
