@@ -58,7 +58,9 @@ DEFAULTS = {
 }
 
 PLANES = {
-    FA18 = "FA-18C_hornet"
+    FA18 = "FA-18C_hornet",
+    F16 = "F-16C_50",
+    MIG29S = "MiG-29S",
 }
 
 PAYLOADS = {}
@@ -322,6 +324,32 @@ PAYLOADS.PLANES.F16.CAP = {
     }
 }
 
+PAYLOADS.PLANES.MIG29S = {}
+PAYLOADS.PLANES.MIG29S.CAP = {
+    {
+        [1] = {
+            ["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+        },
+        [2] = {
+            ["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+        },
+        [3] = {
+            ["CLSID"] = "{B4C01D60-A8A3-4237-BD72-CA7655BC0FE9}",
+        },
+        [4] = {
+            ["CLSID"] = "{2BEC576B-CDF5-4B7F-961F-B0FA4312B841}",
+        },
+        [5] = {
+            ["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+        },
+        [6] = {
+            ["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+        },
+        [7] = {
+            ["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+        },
+    }
+}
 
 
 
