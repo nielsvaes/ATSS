@@ -203,7 +203,7 @@ function ATSS_UTILS.print_table(tbl, indent)
             formatting = string.rep("  ", indent) .. k .. ": "
             if type(v) == "table" then
                 env.info(formatting)
-                PrintTable(v, indent * 2)
+                ATSS_UTILS.print_table(v, indent * 2)
             elseif type(v) == 'boolean' then
                 env.info(formatting .. tostring(v))
             else
