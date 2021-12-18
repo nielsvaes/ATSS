@@ -209,8 +209,8 @@ function ATSS_UTILS.print_table(tbl, indent)
             else
                 env.info(formatting .. v)
             end
-            env.info("=====================================")
       end
+      env.info("=====================================")
 end
 
 ---percentage_chance
