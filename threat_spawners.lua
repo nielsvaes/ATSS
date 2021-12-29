@@ -6,9 +6,8 @@ ATSS = {}
 ---@param kwargs table
 ---This function takes a table with arguments for ease or readability in your code
 ---
----MANDATORY ARGUMENTS
----threat_type: string - either THREAT_TYPE.AIR, THREAT_TYPE.GROUND or THREAT_TYPE.SHIP
----zones:       string or table     - When passing in a string, all zones containing this substring will be considered.
+---threat_type: string              - either THREAT_TYPE.AIR, THREAT_TYPE.GROUND or THREAT_TYPE.SHIP
+---zones: string or table           - When passing in a string, all zones containing this substring will be considered.
 ---
 ---                                        Let's say you have following zones in your mission:
 ---                                          * ZONE SCUD LAUNCHERS 01
@@ -31,12 +30,28 @@ ATSS = {}
 ---                                        And you pass in the table {"NORTH", "MANPAD"}, only the last 4 zones will be considered.
 ---
 ---                                  - When passing in a table containing MOOSE ZONE objects, only those specific zones will be considered
+---                                    WARNING: The zone names SHOULD NOT CONTAIN A HYPHEN (-), since this is considered a special character in Lua
 ---
----             WARNING: The zone names you have in your mission editor SHOULD NOT CONTAIN A HYPHEN (-), since this is considered a special character in Lua
----
----
----OPTIONAL ARGUMENTS
 ---groups: string or table          - Identical to how the zones work, as explained above
+---
+---coords: table                    - Either a vec2 or a vec3 table, structured like this:
+---                                   vec2:
+---                                     {
+---                                         y = 632973.64902081,
+---                                         x = -290618.22703541
+---                                     }
+---
+---                                   vec3:
+---                                     {
+---                                         x = -290618.22703541
+---                                         y = 5.0000047683716
+---                                         z = 632973.64902081,
+---                                     }
+---
+---                                   Note: When using a vec3, the y value is the height.
+---                                         When using a vec2, there is no height and the y value if the vertical value of the coordinate
+---
+---
 ---
 ---size: int or table               - number of groups that will be spawned. Not necessarily the number of actual planes, vehicles or ships. If all of your LATE ACTIVATION
 ---                                   groups consist of 8 vehicles and you set size to 6, you'd get 6 groups of 8 vehicles. Total number of vehicles that are spawned will
@@ -77,7 +92,6 @@ ATSS = {}
 ---                                   in constants.lua
 ---waypoint_offset_min: float       - How much minimal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
 ---waypoint_offset_max: float       - How much maximal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
----clear first: bool                - If set to true, will first destroy any groups matching the naming convention before spawning new ones. Defaults to false
 --SpawnThreat(type, zones, groups, threat_spawner, alias_name, waypoint_offset_min, waypoint_offset_max, notify, clear_first)
 function ATSS.SpawnThreat(kwargs)
     -- check which type of threat we need to spawn and set default values
@@ -114,20 +128,9 @@ function ATSS.SpawnThreat(kwargs)
     waypoint_offset_max = ATSS_UTILS.nautical_miles_to_kilometers(kwargs.waypoint_offset_max) or 0
     local waypoint_offset = math.random(waypoint_offset_min, waypoint_offset_max)
 
-    -- make sure we're always dealing with a table when checking the zones
-    if type(kwargs.zones) == "string" then
-        kwargs.zones = {kwargs.zones}
-    end
-
-    -- search the map for usable zones and put them in spawn_zones
-    local spawn_zones = {}
-    for _, zone in pairs(kwargs.zones) do
-        local found_zones = ATSS_UTILS.get_zones_containing(zone)
-        if found_zones then
-            for _, found_zone in pairs(found_zones) do
-                table.insert(spawn_zones, found_zone)
-            end
-        end
+    -- if we're not allowed to append to the existing threats, we're gonna nuke them all before spawning anything else
+    if kwargs.clear_first then
+        ATSS_UTILS.destroy_all_groups_containing(kwargs.alias_name)
     end
 
     -- make sure we're always dealing with a table when checking the groups
@@ -149,35 +152,64 @@ function ATSS.SpawnThreat(kwargs)
         end
     end
 
-    -- if we're not allowed to append to the existing threats, we're gonna nuke them all before spawning anything else
-    if kwargs.clear_first then
-        ATSS_UTILS.destroy_all_groups_containing(kwargs.alias_name)
+    local alias_name = kwargs.alias_name .. string.format("%03d", #ATSS_UTILS.get_groups_containing(kwargs.alias_name) + 1)
+    local spawn_group = SPAWN:NewWithAlias(kwargs.threat_spawner, alias_name)
+                             :InitRandomizeTemplate(threat_names)
+                             :InitRandomizeRoute(1, 0, waypoint_offset) -- from the first waypoint until the last one
+
+
+    if kwargs.zones then
+        -- make sure we're always dealing with a table when checking the zones
+        if type(kwargs.zones) == "string" then
+            kwargs.zones = {kwargs.zones}
+        end
+
+        -- search the map for usable zones and put them in spawn_zones
+        local spawn_zones = {}
+        for _, zone in pairs(kwargs.zones) do
+            local found_zones = ATSS_UTILS.get_zones_containing(zone)
+            if found_zones then
+                for _, found_zone in pairs(found_zones) do
+                    table.insert(spawn_zones, found_zone)
+                end
+            end
+        end
+
+        spawn_group:InitRandomizeZones(spawn_zones)
     end
-
-    alias_name = kwargs.alias_name .. string.format("%03d", #ATSS_UTILS.get_groups_containing(kwargs.alias_name) + 1)
-    local group = SPAWN:NewWithAlias(kwargs.threat_spawner, alias_name)
-                       :InitRandomizeZones(spawn_zones)
-                       :InitRandomizeTemplate(threat_names)
-                       :InitRandomizeRoute(1, 0, waypoint_offset) -- from the first waypoint until the last one
-
 
     for i=1, kwargs.size do
         env.info("Spawning " .. string.format("%02d", i))
 
         if kwargs.threat_type == THREAT_TYPE.GROUND then
-            group:InitGroupHeading(0, 360)
+            spawn_group:InitGroupHeading(0, 360)
         end
-        group:Spawn()
-    end
 
-    table.insert(ALL_SPAWNED_GROUPS, group)
+        if kwargs.zones then
+            -- if a zone was passed in, spawn in that zone
+            spawn_group:Spawn()
+        end
+
+        if kwargs.coords then
+            -- if coordinates were passed in
+            if kwargs.coords.z then
+                -- and they have a Z value, spawn from Vec3
+                spawn_group:SpawnFromVec3(kwargs.coords)
+            else
+                -- if not, they're a Vec2
+                spawn_group:SpawnFromVec2(kwargs.coords)
+            end
+        end
+    end
 
     if kwargs.notify then
         MESSAGE:New("Threat spawned"):ToAll()
         MESSAGE:New("Threat type: " .. kwargs.threat_type):ToAll()
         MESSAGE:New("Threat number: " .. kwargs.size):ToAll()
     end
-    return group
+
+    table.insert(ALL_SPAWNED_GROUPS, spawn_group)
+    return spawn_group
 end
 
 
