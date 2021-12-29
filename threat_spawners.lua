@@ -7,78 +7,68 @@ ATSS = {}
 ---This function takes a table with arguments for ease or readability in your code
 ---
 ---MANDATORY ARGUMENTS
----threat_type: string - either THREAT_TYPE.A2A, THREAT_TYPE.A2G or THREAT_TYPE.A2SHIP
----zones:       table - table containing the zones in which the threat should be spawned. These zones need to exist on the map.
----                     You pass the table form of {"MY ZONE NAME 01", "MY ZONE NAME 02"}.
+---threat_type: string - either THREAT_TYPE.AIR, THREAT_TYPE.GROUND or THREAT_TYPE.SHIP
+---zones:       string or table     - When passing in a string, all zones containing this substring will be considered.
 ---
----                     For example, let's say you have the following zones on the map:
----                        * A2A DAMASCUS NORTH 01, A2A DAMASCUS NORTH 02, A2A DAMASCUS NORTH 03
----                        * A2A DAMASCUS SOUTH 01, A2A DAMASCUS SOUTH 02, A2A DAMASCUS SOUTH 03
----                        * A2A DAMASCUS WEST 01, A2A DAMASCUS WEST 02, A2A DAMASCUS WEST 03
----                        * A2A AL RAQQA WEST 01, A2A AL RAQQA WEST 02, A2A AL RAQQA WEST 03
----                        * A2A AL RAQQA EAST 01, A2A AL RAQQA EAST 02, A2A AL RAQQA EAST 03
+---                                        Let's say you have following zones in your mission:
+---                                          * ZONE SCUD LAUNCHERS 01
+---                                          * ZONE SCUD LAUNCHERS 02
+---                                          * ZONE SCUD LAUNCHERS NORTH 01
+---                                          * ZONE SCUD LAUNCHERS NORTH 02
+---                                          * ZONE MANPAD LAUNCHERS 01
+---                                          * ZONE MANPAD LAUNCHERS 02
+---                                        And you pass in the string "LAUNCHERS", all zones in the list will be considered to be used to spawn the threat.
+---                                        If you pass in "SCUD", only the first 4 in the list will be considered
 ---
----                     If you want to spawn the threat anywhere around Damascus, you could do pass "A2A DAMASCUS" as the argument
----                     and this would return all 9 Damascus zones.
----                     Let's say you only want to threats to come from the north, you could pass "A2A DAMASCUS NORTH"
----                     and the thrats would only spawn in A2A DAMASCUS NORTH 01, A2A DAMASCUS NORTH 02, A2A DAMASCUS NORTH 03
----                     If you want all A2A zones on the map, you could pass "A2A" and threats would be spawned in the zones for
----                     both Damascus and Al Raqqa, because every zone has "A2A" in it.
+---                                  - When passing in a table containing strings, any zone containing any of the strings will be considered
+---                                        Let's say you have following zones in your mission:
+---                                          * ZONE SCUD LAUNCHERS 01
+---                                          * ZONE SCUD LAUNCHERS 02
+---                                          * ZONE SCUD LAUNCHERS NORTH 01
+---                                          * ZONE SCUD LAUNCHERS NORTH 02
+---                                          * ZONE MANPAD LAUNCHERS 01
+---                                          * ZONE MANPAD LAUNCHERS 02
+---                                        And you pass in the table {"NORTH", "MANPAD"}, only the last 4 zones will be considered.
+---
+---                                  - When passing in a table containing MOOSE ZONE objects, only those specific zones will be considered
+---
+---             WARNING: The zone names you have in your mission editor SHOULD NOT CONTAIN A HYPHEN (-), since this is considered a special character in Lua
+---
 ---
 ---OPTIONAL ARGUMENTS
----groups: string or table          - Name of the group(s) you want to spawn. This can be a normal string ("A2A ACE") or a table containing multiple strings
----                                   ({"JF-17 BANDITS", "F-18 BANDITS"})
----                                   Ideally, you should always have a group in the mission that has the word "RANDOM" (all capital) in its name.
----                                   This is the group the function will default to if you don't pass the groups argument
+---groups: string or table          - Identical to how the zones work, as explained above
 ---
----                                   Let's try to set up an example.
----                                   Say you have 7 airplane groups on the map set to late activation
----                                     * A2A ROOKIE 1 SHIP     -> skill set to ROOKIE in ME
----                                     * A2A ROOKIE 2 SHIP     -> skill set to ROOKIE in ME
----                                     * A2A ROOKIE 3 SHIP     -> skill set to ROOKIE in ME
----                                     * A2A ACE               -> skill set to ace in ME
----                                     * A2A RANDOM 4 SHIP     -> skill set to random in ME
----                                     * A2A RANDOM 2 SHIP     -> skill set to random in ME
----                                     * RAPTOR GROUP          -> a group that's very specific
----                                     * CROW GROUP            -> a group that's very specific
----                                   You would pass either part of the name or the whole name as the groups argument.
----                                   For example: if you pass "2 SHIP" as the groups argument, the function would spawn random groups of
----                                   "A2A RANDOM 2 SHIP" and "A2A ROOKIE 2 SHIP".
----                                   Another example: you only want to spawn ROOKIE groups and don't really care which ones. You would pass in "ROOKIE" as the
----                                   groups argument to get "A2A ROOKIE 1 SHIP", "A2A ROOKIE 2 SHIP", "A2A ROOKIE 3 SHIP"
----                                   Another example: you want to spawn RAPTOR GROUP and ACE and any 2 SHIP group. Then you'd pass a table to the groups argument
----                                   like this {"RAPTOR GROUP", "ACE", "2 SHIP"} to have the function pick from the following groups:
----                                   "RAPTOR GROUP", "A2A ACE", "A2A ROOKIE 2 SHIP" and "A2A RANDOM 2 SHIP"
----
----size: int                        - number of groups that will be spawned. Not necessarily the number of actual planes, vehicles or ships. If all of your LATE ACTIVATION
+---size: int or table               - number of groups that will be spawned. Not necessarily the number of actual planes, vehicles or ships. If all of your LATE ACTIVATION
 ---                                   groups consist of 8 vehicles and you set size to 6, you'd get 6 groups of 8 vehicles. Total number of vehicles that are spawned will
----                                   be 48
+---                                   be 48. You can also pass in a 2 int table, will be used as the min and max to spawn a random number of groups
 ---threat_spawner: string           - the LATE ACTIVATION group that will be used to spawn the groups. The groups will get the initial heading, waypoints and inital speed from the threat_spawner.
----                                   If none is given, the function will default to the value of A2A.spawner/A2G.spawner/A2SHIP.spawner, set in globals.lua.
+---                                   If none is given, the function will default to the value of AIR.spawner/GROUND.spawner/SHIP.spawner, set in globals.lua.
 ---                                   So make sure there is a group on the map that has this name set.
 ---
 ---                                   You can have multiple of these spawner groups for different purposes.
----                                   For example: you want to spawn 4 static tanks and 2 moving tanks. You would make one LATE ACTIVATION ground group named "A2G TANKS STATIC SPAWNER"
----                                   and another one called "A2G TANKS MOVING SPAWNER". "A2G TANKS MOVING SPAWNER" will need a couple of waypoints set, "A2G TANKS STATIC SPAWNER" shouldn't have any waypoints.
+---                                   For example: you want to spawn 4 static tanks and 2 moving tanks. You would make one LATE ACTIVATION ground group named "TANKS STATIC SPAWNER"
+---                                   and another one called "A2G TANKS MOVING SPAWNER". "A2G TANKS MOVING SPAWNER" will need a couple of waypoints set, "TANKS STATIC SPAWNER" shouldn't have any waypoints.
 ---
 ---                                   You can then call the function twice, once for the static tanks and once for the moving tanks like this:
 ---
----                                   SpawnThreat{
----                                     threat_type = THREAT_TYPE.A2G,
+---                                   SpawnThreat
+---                                   {
+---                                     threat_type = THREAT_TYPE.GROUND,
 ---                                     zones = "TANK ZONES",
----                                     threat_spawner = "A2G TANKS STATIC SPAWNER",
+---                                     threat_spawner = "TANKS STATIC SPAWNER",
 ---                                     size = 4
 ---                                   }
 ---
----                                   SpawnThreat{
----                                     threat_type = THREAT_TYPE.A2G,
+---                                   SpawnThreat
+---                                   {
+---                                     threat_type = THREAT_TYPE.GROUND,
 ---                                     zones = "TANK ZONES",
----                                     threat_spawner = "A2G TANKS MOVING SPAWNER",
+---                                     threat_spawner = "TANKS MOVING SPAWNER",
 ---                                     size = 2
 ---                                   }
 ---
 ---alias_name: string               - name that the spawned threats will receive. If this value is not set, If none is given,
----                                   the function will default to the value of A2A.threat/A2G.threat/A2SHIP.threat
+---                                   the function will default to the value of AIR.threat/GROUND.threat/SHIP.threat
 ---notify: bool                     - whether or not the coalition should be notified when threats are spawned. Defaults to true
 ---clear_first: bool                - whether or not to remove any existing groups that share the alias_name before spawning new ones.
 ---                                   This value defaults to false, so anything new you spawn will be appended to the already existing groups.
@@ -87,7 +77,8 @@ ATSS = {}
 ---                                   in constants.lua
 ---waypoint_offset_min: float       - How much minimal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
 ---waypoint_offset_max: float       - How much maximal offset should be applied to the waypoints in nautical miles. Defaults to 0, so no offset
---SpawnThreat(type, zones, groups, threat_spawner, alias_name, waypoint_offset_min, waypoint_offset_max, notify, clear_first )
+---clear first: bool                - If set to true, will first destroy any groups matching the naming convention before spawning new ones. Defaults to false
+--SpawnThreat(type, zones, groups, threat_spawner, alias_name, waypoint_offset_min, waypoint_offset_max, notify, clear_first)
 function ATSS.SpawnThreat(kwargs)
     -- check which type of threat we need to spawn and set default values
     if kwargs.threat_type == THREAT_TYPE.AIR then
@@ -130,7 +121,7 @@ function ATSS.SpawnThreat(kwargs)
 
     -- search the map for usable zones and put them in spawn_zones
     local spawn_zones = {}
-    for _, zone in pairs(kwargs.zones )do
+    for _, zone in pairs(kwargs.zones) do
         local found_zones = ATSS_UTILS.get_zones_containing(zone)
         if found_zones then
             for _, found_zone in pairs(found_zones) do
