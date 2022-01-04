@@ -138,7 +138,7 @@ function ATSS.SpawnThreat(kwargs)
         kwargs.groups = { kwargs.groups }
     end
 
-    -- search the map for usuable groups and put them in threats
+    -- search the DB for usuable groups and put them in threats
     local threats = {}
     -- MOOSE's InitRandomizeTemplate needs strings, not actual objects, so we have to grab the names of everything in the threats array
     local threat_names = {}
@@ -296,25 +296,6 @@ function ATSS.SpawnStaticObject(kwargs)
     end
     return static_object
 end
-
-
-
------------------------------------------------------------------------
----
----  BASIC CHECKS
----
------------------------------------------------------------------------
-
-
---if #GetGroupsContaining(AIR.random, false) == 0 then
---    MESSAGE:New("WARNING: Can't find an AIR RANDOM group! If you're spawning air threats, make sure you've named them all!", 15):ToAll()
---end
---if #GetGroupsContaining(GROUND.random, false) == 0 then
---    MESSAGE:New("WARNING: Can't find an GROUND RANDOM group! If you're spawning ground threats, make sure you've named them all!", 15):ToAll()
---end
---if #GetGroupsContaining(SHIP.random, false) == 0 then
---    MESSAGE:New("WARNING: Can't find an SHIP RANDOM group! If you're spawning ship threats, make sure you've named them all!", 15):ToAll()
---end
 
 
 MESSAGE:New("Threat spawners loaded"):ToAll()
