@@ -51,7 +51,7 @@ function ATSS_UTILS.get_zones_containing(substring, as_strings, as_set)
     local zone_array = zone_set:GetSetObjects()
 
     if #zone_array == 0 then
-        env.error("CAN'T FIND ANY ZONES WITH: " .. substring)
+        env.error("CAN'T FIND ANY ZONES WITH: '" .. substring .. "'")
     end
 
     if as_strings then
@@ -217,7 +217,7 @@ end
 ---@param chance int
 ---Does a random dice roll to see if something with x percent of chance will happen
 function ATSS_UTILS.percentage_chance(chance)
-    chance = Clamp(chance, 0, 100)
+    chance = ATSS_UTILS.clamp(chance, 0, 100)
     local percentage = math.random(0, 100)
     if percentage < chance then
         return true
@@ -301,5 +301,34 @@ function ATSS_UTILS.deepcopy(o, seen)
   return no
 end
 
+
+---contains Checks if a table contains a value
+---@param tbl table
+---@param element table
+function table.contains(tbl, element)
+    for _, value in pairs(tbl) do
+        if value == element then
+            return true
+        end
+    end
+    return false
+end
+
+
+---remove_by_value Removes an element of a table based on its value
+---@param tbl void
+---@param element void
+function table.remove_by_value(tbl, element)
+    local indices_to_remove = {}
+    for index, value in pairs(tbl) do
+        if value == element then
+            table.insert(indices_to_remove, index)
+        end
+    end
+
+    for _, index in pairs(indices_to_remove) do
+        table.remove(tbl, index)
+    end
+end
 
 MESSAGE:New("Utils loaded", 5):ToAll()
