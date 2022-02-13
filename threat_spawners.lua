@@ -257,36 +257,44 @@ function ATSS.SpawnStaticObject(kwargs)
         kwargs.types = {kwargs.types}
     end
 
-    -- make sure we're always dealing with a table when checking the zones
-    if type(kwargs.zones) == "string" then
-        kwargs.zones = {kwargs.zones}
-    end
+    if kwargs.zone then
+        -- make sure we're always dealing with a table when checking the zones
+        if type(kwargs.zones) == "string" then
+            kwargs.zones = {kwargs.zones}
+        end
 
-    -- search the map for usable zones and put them in spawn_zones
-    local spawn_zones = {}
-    for _, zone in pairs(kwargs.zones) do
-        local found_zones = ATSS_UTILS.get_zones_containing(zone)
-        if found_zones then
-            for _, found_zone in pairs(found_zones) do
-                table.insert(spawn_zones, found_zone)
+        -- search the map for usable zones and put them in spawn_zones
+        local spawn_zones = {}
+        for _, zone in pairs(kwargs.zones) do
+            local found_zones = ATSS_UTILS.get_zones_containing(zone)
+            if found_zones then
+                for _, found_zone in pairs(found_zones) do
+                    table.insert(spawn_zones, found_zone)
+                end
             end
         end
     end
+
 
     -- static object to return
     local static_object
     for _ = 1, kwargs.amount do
         local static_type = kwargs.types[math.random(#kwargs.types)] -- pick a random type in case we have multiple
-        local zone = spawn_zones[math.random(#spawn_zones)] -- pick a random zone in case we have multiple
         static_object = SPAWNSTATIC:NewFromType(static_type, kwargs.category, kwargs.country)
                                    :InitNamePrefix(kwargs.alias_name .. static_type .. tostring(math.random(0, 90000))) -- make sure it has a random name
                                    :InitShape(kwargs.shape)
 
         local position
-        if kwargs.random_in_zone then
-            position = zone:GetRandomPointVec2()
+
+        if kwargs.zone then
+            local zone = spawn_zones[math.random(#spawn_zones)] -- pick a random zone in case we have multiple
+            if kwargs.random_in_zone then
+                position = zone:GetRandomPointVec2()
+            else
+                position = zone:GetPointVec2(0)
+            end
         else
-            position = zone:GetPointVec2(0)
+            position = POINT_VEC2:New(kwargs.x, kwargs.y)
         end
         static_object:SpawnFromPointVec2(position, math.random(heading_min, heading_max))
     end
