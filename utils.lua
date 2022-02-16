@@ -166,7 +166,7 @@ function ATSS_UTILS.destroy_all_statics_containing(search_strings, message)
 
     local destroy_set = {}
     for _, search_string in pairs(search_strings) do
-        destroy_set = GetStaticsContaining(search_string)
+        destroy_set = ATSS_UTILS.get_statics_containing(search_string)
         for _, to_destroy in pairs(destroy_set) do
             to_destroy:Destroy()
         end
